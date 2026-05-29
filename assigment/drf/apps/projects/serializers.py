@@ -26,10 +26,13 @@ class ProjectMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = projectMember
         fields = ['id', 'project', 'user', 'role', 'created_at', 'updated_at']
+        # FIX: user and role are set automatically in perform_create from request.user
+        # Without read_only, DRF validates them as required request fields → 400 error
+        read_only_fields = ['user', 'role']
 
 
 class StageApprovalSerializer(serializers.ModelSerializer):
     class Meta:
         model = StageApproval
         fields = ['id', 'stage', 'proposed_by', 'approved_by', 'status', 'created_at', 'updated_at']
-        read_only_fields = ['proposed_by']
+        read_only_fields = ['proposed_by', 'approved_by', 'status']

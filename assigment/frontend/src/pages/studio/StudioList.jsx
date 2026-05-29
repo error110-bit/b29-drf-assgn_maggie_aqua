@@ -1,55 +1,53 @@
-import { useEffect, useState } from "react"
-import { getStudios } from "./StudioApi"
-import { Link } from "react-router-dom"
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { getCurrentUser } from '../../components/auth/api'
+import { getStudios } from './StudioApi'
 
 export default function StudioList() {
+  const [studios, setStudios] = useState([])
+  const [currentUser, setCurrentUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-    const [studios, setStudios] = useState([])
+  useEffect(() => {
+    Promise.all([getStudios(), getCurrentUser()])
+      .then(([s, user]) => {
+        setStudios(s)
+        setCurrentUser(user)
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [])
 
-    useEffect(() => {
+  if (loading) return <div className="loading">Loading studios…</div>
 
-        const fetchStudios = async () => {
+  return (
+    <div className="page">
+      <div className="page-header">
+        <h1>Studios</h1>
+        {currentUser?.role === 'admin' && (
+          <Link to="/studios/create" className="btn-primary">+ New Studio</Link>
+        )}
+      </div>
 
-            try {
+      {studios.length === 0 && (
+        <p className="empty">
+          {currentUser?.role === 'admin' ? 'No studios yet. Create the first one!' : 'No studios assigned yet.'}
+        </p>
+      )}
 
-                const data = await getStudios()
-                setStudios(data)
-
-            } catch (error) {
-
-                console.log(error)
-            }
-        }
-
-        fetchStudios()
-
-    }, [])
-
-    return (
-        <div>
-
-            <div className="page-header">
-                <h1>Studios</h1>
-
-                <Link to="/createstudio">
-                    <button>Create Studio</button>
-                </Link>
+      <div className="card-grid">
+        {studios.map(studio => (
+          <div key={studio.id} className="card">
+            <h3>{studio.name}</h3>
+            <p>{studio.description}</p>
+            <div className="card-actions">
+              <Link to={`/studios/${studio.id}/projects`} className="btn-primary">
+                View Projects →
+              </Link>
             </div>
-
-            {
-                studios.map((studio) => (
-
-                    <div key={studio.id}>
-
-                        <h3>{studio.name}</h3>
-
-                        <p>{studio.description}</p>
-
-                    </div>
-                ))
-            }
-
-        </div>
-    )
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
-

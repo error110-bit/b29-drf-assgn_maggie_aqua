@@ -65,7 +65,9 @@ class StageApproval(TimeStampe):
     approved_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='approved_approvals'
+        related_name='approved_approvals',
+        null=True,
+        blank=True
     )
     status = models.CharField(
         max_length=50,
@@ -82,4 +84,3 @@ class StageApproval(TimeStampe):
     def __str__(self):
         return f"{self.stage} - {self.status}"
     
-

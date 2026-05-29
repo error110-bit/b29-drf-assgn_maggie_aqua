@@ -13,4 +13,8 @@ class StudioMembershipSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudioMembership
         fields = ['id', 'user', 'studio', 'role', 'created_at', 'updated_at']
-        read_only_fields = ['user', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+        extra_kwargs = {
+            'user': {'required': False},
+            'role': {'required': False},
+        }

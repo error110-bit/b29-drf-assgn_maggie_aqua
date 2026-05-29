@@ -3,7 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Discussion_Thread, Comment
 from .serializers import DiscussionThreadSerializer, CommentSerializer
 from apps.users.permissions import IsClientReadOnly
-
+from apps.notifications.services import notify_comment_created
 
 class DiscussionThreadViewSet(viewsets.ModelViewSet):
     queryset = Discussion_Thread.objects.all()
@@ -24,4 +24,5 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsClientReadOnly]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        comment = serializer.save(user=self.request.user)
+        notify_comment_created(comment, self.request.user)

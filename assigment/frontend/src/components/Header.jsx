@@ -1,19 +1,22 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function Header() {
-    return (
-        <header className="navbar">
-            <h2>Creative Workflow Tracker</h2>
+  const navigate = useNavigate()
 
-            <nav>
-                <Link to="/">Home</Link>
-                <Link to="/studios">Studios</Link>
-                <Link to="/projectlist">Projects</Link>
-                <Link to="/tasklist">Tasks</Link>
-                <Link to="/attachmentlist">Attachments</Link>
-                <Link to="/notificationlist">Notifications</Link>
-                <Link to="/threadlist">Discussions</Link>
-            </nav>
-        </header>
-    )
+  const logout = () => {
+    localStorage.removeItem('access')
+    localStorage.removeItem('refresh')
+    navigate('/login')
+  }
+
+  return (
+    <header className="navbar">
+      <Link to="/" className="brand">Creative Workflow</Link>
+      <nav>
+        <Link to="/studios">Studios</Link>
+        <Link to="/notifications">Notifications</Link>
+        <button className="logout-btn" onClick={logout}>Logout</button>
+      </nav>
+    </header>
+  )
 }

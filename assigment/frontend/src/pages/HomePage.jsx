@@ -3,17 +3,25 @@ import { Link } from "react-router-dom"
 export default function HomePage() {
     return (
         <div className="homepage">
-            <h1>Creative Workflow Tracker</h1>
-            <p>Manage projects, tasks, discussions, attachments and notifications.</p>
 
-            <div className="card-grid">
-                <Link to="/studios" className="card">Studios</Link>
-                <Link to="/projectlist" className="card">Projects</Link>
-                <Link to="/tasklist" className="card">Tasks</Link>
-                <Link to="/attachmentlist" className="card">Attachments</Link>
-                <Link to="/notificationlist" className="card">Notifications</Link>
-                <Link to="/threadlist" className="card">Discussions</Link>
+            <div className="primary-card">
+
+                <h1>Creative Workflow Tracker</h1>
+
+                <p>
+                    Organize projects, collaborate with your team,
+                    manage tasks, discussions, attachments and notifications
+                    from one place.
+                </p>
+
+                <Link to="/studios">
+                    <button>
+                        Start Creating
+                    </button>
+                </Link>
+
             </div>
+
         </div>
     )
 }
