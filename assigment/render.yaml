@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: creative-studio-api
+    runtime: python
+    plan: free
+    rootDir: assigment/drf
+    buildCommand: ./build.sh
+    startCommand: gunicorn configuration.wsgi:application
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: creative-studio-db
+          property: connectionString
+
+databases:
+  - name: creative-studio-db
+    plan: free
