@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from apps.studios.models import Studio, StudioMembership
 from apps.studios.serializers import StudioSerializer, StudioMembershipSerializer
 from apps.users.permissions import IsAdmin
+from apps.studios.access import accessible_studios
 
 
 class StudioViewSet(viewsets.ModelViewSet):
@@ -19,10 +20,7 @@ class StudioViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return Studio.objects.none()
-        if user.role == 'admin':
-            return Studio.objects.filter(created_by=user)
-        studio_ids = StudioMembership.objects.filter(user=user).values_list('studio_id', flat=True)
-        return Studio.objects.filter(id__in=studio_ids).distinct()
+        return accessible_studios(user)
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)

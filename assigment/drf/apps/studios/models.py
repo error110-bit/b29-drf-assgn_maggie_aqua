@@ -23,4 +23,10 @@ class StudioMembership(TimeStampe):
     def __str__(self):
         return f"{self.user.email} - {self.studio.name}"
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'studio'], name='unique_studio_membership'
+            )
+        ]
 

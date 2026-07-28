@@ -10,7 +10,7 @@ from .serializers import (
     ProjectMemberSerializer, StageApprovalSerializer
 )
 from apps.users.permissions import IsProjectLeadorAdmin, IsClientReadOnly, IsReviewer
-from apps.studios.models import StudioMembership
+from apps.studios.access import accessible_studios
 from apps.notifications.services import notify_task_assigned, notify_stage_approval_requested
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -21,10 +21,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return project.objects.none()
-        if user.role == 'admin':
-            return project.objects.filter(studio__created_by=user)
-        studio_ids = StudioMembership.objects.filter(user=user).values_list('studio_id', flat=True)
-        return project.objects.filter(studio__in=studio_ids).distinct()
+        return project.objects.filter(studio__in=accessible_studios(user)).distinct()
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -92,10 +89,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return Task.objects.none()
-        if user.role == 'admin':
-            return Task.objects.filter(project__studio__created_by=user)
-        studio_ids = StudioMembership.objects.filter(user=user).values_list('studio_id', flat=True)
-        return Task.objects.filter(project__studio__in=studio_ids).distinct()
+        return Task.objects.filter(project__studio__in=accessible_studios(user)).distinct()
 
     def perform_create(self, serializer):
         task = serializer.save(created_by=self.request.user)
@@ -112,10 +106,7 @@ class StageViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return Stage.objects.none()
-        if user.role == 'admin':
-            return Stage.objects.filter(project__studio__created_by=user)
-        studio_ids = StudioMembership.objects.filter(user=user).values_list('studio_id', flat=True)
-        return Stage.objects.filter(project__studio__in=studio_ids).distinct()
+        return Stage.objects.filter(project__studio__in=accessible_studios(user)).distinct()
 
 
 class ProjectMemberViewSet(viewsets.ModelViewSet):
@@ -130,10 +121,7 @@ class ProjectMemberViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if not user.is_authenticated:
             return projectMember.objects.none()
-        if user.role == 'admin':
-            return projectMember.objects.filter(project__studio__created_by=user)
-        studio_ids = StudioMembership.objects.filter(user=user).values_list('studio_id', flat=True)
-        return projectMember.objects.filter(project__studio__in=studio_ids).distinct()
+        return projectMember.objects.filter(project__studio__in=accessible_studios(user)).distinct()
 
     def create(self, request, *args, **kwargs):
         project_id = request.data.get('project')
@@ -169,7 +157,12 @@ class StageApprovalViewSet(viewsets.ModelViewSet):
     filterset_fields = ['stage']
 
     def get_queryset(self):
-        return StageApproval.objects.all()
+        user = self.request.user
+        if not user.is_authenticated:
+            return StageApproval.objects.none()
+        return StageApproval.objects.filter(
+            stage__project__studio__in=accessible_studios(user)
+        ).distinct()
 
     def perform_create(self, serializer):
         stage_approval = serializer.save(proposed_by=self.request.user)

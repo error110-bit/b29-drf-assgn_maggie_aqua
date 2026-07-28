@@ -10,6 +10,15 @@ class StudioSerializer(serializers.ModelSerializer):
 
 
 class StudioMembershipSerializer(serializers.ModelSerializer):
+    def validate_studio(self, studio):
+        # This also protects PATCH requests from moving a membership into a
+        # studio owned by a different administrator.
+        if studio.created_by_id != self.context['request'].user.id:
+            raise serializers.ValidationError(
+                'You can only manage memberships for studios you created.'
+            )
+        return studio
+
     class Meta:
         model = StudioMembership
         fields = ['id', 'user', 'studio', 'role', 'created_at', 'updated_at']
